@@ -1,12 +1,18 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <queue>
+#include <unordered_set>
+#include <utility>
 
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
+  explicit Reassembler( ByteStream&& output );
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -34,12 +40,15 @@ public:
   uint64_t bytes_pending() const;
 
   // Access output stream reader
-  Reader& reader() { return output_.reader(); }
-  const Reader& reader() const { return output_.reader(); }
+  Reader& reader() { return _output.reader(); }
+  const Reader& reader() const { return _output.reader(); }
 
   // Access output stream writer, but const-only (can't write from outside)
-  const Writer& writer() const { return output_.writer(); }
+  const Writer& writer() const { return _output.writer(); }
 
 private:
-  ByteStream output_; // the Reassembler writes to this ByteStream
+  ByteStream _output;               // the Reassembler writes to this ByteStream.
+  uint64_t _next_expected_index;    // the index of the next byte to be written.
+  std::map<uint64_t, char> _buffer; // use for store bytes that can't be written yet.
+  uint64_t _end_index;              // use for determine the end.
 };
