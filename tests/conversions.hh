@@ -14,7 +14,7 @@ using std::to_string;
 class DebugWrap32 : public Wrap32
 {
 public:
-  uint32_t debug_get_raw_value() { return raw_value_; }
+  uint32_t debug_get_raw_value() { return _raw_value; }
 };
 
 inline std::string to_string( Wrap32 i )

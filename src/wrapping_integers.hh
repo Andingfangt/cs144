@@ -11,7 +11,7 @@
 class Wrap32
 {
 public:
-  explicit Wrap32( uint32_t raw_value ) : raw_value_( raw_value ) {}
+  explicit Wrap32( uint32_t raw_value ) : _raw_value( raw_value ) {}
 
   /* Construct a Wrap32 given an absolute sequence number n and the zero point. */
   static Wrap32 wrap( uint64_t n, Wrap32 zero_point );
@@ -25,9 +25,9 @@ public:
    */
   uint64_t unwrap( Wrap32 zero_point, uint64_t checkpoint ) const;
 
-  Wrap32 operator+( uint32_t n ) const { return Wrap32 { raw_value_ + n }; }
-  bool operator==( const Wrap32& other ) const { return raw_value_ == other.raw_value_; }
+  Wrap32 operator+( uint32_t n ) const { return Wrap32 { _raw_value + n }; }
+  bool operator==( const Wrap32& other ) const { return _raw_value == other._raw_value; }
 
 protected:
-  uint32_t raw_value_ {};
+  uint32_t _raw_value {};
 };
