@@ -27,76 +27,76 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   // if current index is out of range, break the loop
   uint64_t end_index = min( writer().available_capacity() + _next_expected_index, first_index + data.size() ) - 1;
   // if the valid range is empty, no need to insert
-  if ( end_index < start_index || data.empty())  goto close_check;
+  if ( end_index < start_index || data.empty() )
+    goto close_check;
 
   // ** first, insert all data into buffer with mergy **
   {
-  data = data.substr( start_index - first_index, end_index - start_index + 1 );
-  piceData curr_data = { start_index, end_index, move( data ) };
-  auto it = _buffer.begin(); // could use binary_search.
-  // loop all inside buffer_data to compress the buffer by merge
-  while ( it != _buffer.end() ) {
-    // if find a subData.end_index < curr_data.start, countinue the loop
-    if ( it->end_index < curr_data.start_index ) {
-      ++it;
-      continue;
-    }
+    data = data.substr( start_index - first_index, end_index - start_index + 1 );
+    piceData curr_data = { start_index, end_index, move( data ) };
+    auto it = _buffer.begin(); // could use binary_search.
+    // loop all inside buffer_data to compress the buffer by merge
+    while ( it != _buffer.end() ) {
+      // if find a subData.end_index < curr_data.start, countinue the loop
+      if ( it->end_index < curr_data.start_index ) {
+        ++it;
+        continue;
+      }
 
-    // if find a subData that is overlaped by curr_data, just remove it and continue the loop
-    if ( it->start_index >= curr_data.start_index && it->end_index <= curr_data.end_index ) {
+      // if find a subData that is overlaped by curr_data, just remove it and continue the loop
+      if ( it->start_index >= curr_data.start_index && it->end_index <= curr_data.end_index ) {
+        it = _buffer.erase( it );
+        continue;
+      }
+
+      // if find a subData that overlaps curr_data. no need to do anything.
+      if ( it->start_index <= curr_data.start_index && it->end_index >= curr_data.end_index ) {
+        goto close_check;
+      }
+
+      // if find a subData.start_index > curr_data.end_index, break the loop
+      if ( it->start_index > curr_data.end_index ) {
+        break;
+      }
+
+      // left is two cases:
+      // case1: subData.end_index < curr_data.end_index, merge subData to curr_data's left
+      if ( it->end_index < curr_data.end_index ) {
+        string add_data = it->data.substr( 0, curr_data.start_index - it->start_index );
+        curr_data.start_index = it->start_index;
+        curr_data.data.insert( 0, move( add_data ) );
+      }
+      // case2: subData.start_index <= curr_data.end_index, merge subData to curr_data's right
+      else {
+        string add_data
+          = it->data.substr( curr_data.end_index - it->start_index + 1, it->end_index - curr_data.end_index );
+        curr_data.end_index = it->end_index;
+        curr_data.data.append( move( add_data ) );
+      }
+      // remove the subData from buffer
       it = _buffer.erase( it );
-      continue;
     }
+    // insert curr_data into buffer
+    _buffer.emplace( it, move( curr_data ) );
 
-    // if find a subData that overlaps curr_data. no need to do anything.
-    if ( it->start_index <= curr_data.start_index && it->end_index >= curr_data.end_index) {
-      goto close_check;
+    // ** then, write valid data from buffer to output stream **
+    it = _buffer.begin();
+    while ( it != _buffer.end() && it->start_index == _next_expected_index ) {
+      _output.writer().push( move( it->data ) );
+      _next_expected_index = it->end_index + 1;
+      it = _buffer.erase( it );
     }
-
-    // if find a subData.start_index > curr_data.end_index, break the loop
-    if ( it->start_index > curr_data.end_index ) {
-      break;
-    }
-
-    // left is two cases:
-    // case1: subData.end_index < curr_data.end_index, merge subData to curr_data's left
-    if ( it->end_index < curr_data.end_index ) {
-      string add_data = it->data.substr( 0, curr_data.start_index - it->start_index );
-      curr_data.start_index = it->start_index;
-      curr_data.data.insert(0, move(add_data));
-    }
-    // case2: subData.start_index <= curr_data.end_index, merge subData to curr_data's right
-    else {
-      string add_data = it->data.substr( curr_data.end_index - it->start_index + 1, it->end_index - curr_data.end_index );
-      curr_data.end_index = it->end_index;
-      curr_data.data.append( move(add_data) );
-    }
-    // remove the subData from buffer
-    it = _buffer.erase( it );
-  }
-  // insert curr_data into buffer
-  _buffer.emplace( it, move(curr_data) );
-
-
-  // ** then, write valid data from buffer to output stream **
-  it = _buffer.begin();
-  while (it != _buffer.end() && it->start_index == _next_expected_index ) {
-    _output.writer().push(move(it->data));
-    _next_expected_index = it->end_index + 1;
-    it = _buffer.erase( it );
-  }
   }
 
-  // check if all bytes have been written to the output stream
-  close_check:
+// check if all bytes have been written to the output stream
+close_check:
   if ( _next_expected_index == _end_index ) {
     _output.writer().close();
   }
 }
 
-
 uint64_t Reassembler::bytes_pending() const
-{ 
+{
   // return the total size in buffer
   uint64_t total_size = 0;
   for ( const auto& subData : _buffer ) {

@@ -26,7 +26,7 @@ void Writer::push( string data )
     if ( available_capacity() == 0 ) {
       break;
     }
-    _buf.push_back(c);
+    _buf.push_back( c );
     _buffer_bytes++;
     _pushed_bytes++;
   }

@@ -9,11 +9,11 @@ class TCPReceiver
 {
 public:
   // Construct with given Reassembler
-  explicit TCPReceiver( Reassembler&& reassembler ) 
-  : _reassembler( std::move( reassembler ) ) 
-  , _zero_point( 0 )  // Initialize zero point to 0
-  , SYN( false ) // Initialize SYN to false
-  , RYN( false ) // Initialize RYN to false
+  explicit TCPReceiver( Reassembler&& reassembler )
+    : _reassembler( std::move( reassembler ) )
+    , _zero_point( 0 ) // Initialize zero point to 0
+    , SYN( false )     // Initialize SYN to false
+    , RYN( false )     // Initialize RYN to false
   {}
 
   /*
@@ -36,10 +36,9 @@ public:
   // return true if has error in streams
   bool has_error() const { return _reassembler.has_error(); }
 
-
 private:
   Reassembler _reassembler;
   Wrap32 _zero_point; // use for unwrap
-  bool SYN; // if set, means we've received a SYN from the peer
-  bool RYN; // if set, means error happend.
+  bool SYN;           // if set, means we've received a SYN from the peer
+  bool RYN;           // if set, means error happend.
 };
