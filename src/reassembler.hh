@@ -2,6 +2,7 @@
 
 #include "byte_stream.hh"
 #include <cstdint>
+#include <deque>
 #include <functional>
 #include <map>
 #include <queue>
@@ -46,9 +47,19 @@ public:
   // Access output stream writer, but const-only (can't write from outside)
   const Writer& writer() const { return _output.writer(); }
 
+  // set error to the stream
+  void set_error() { _output.set_error(); }
+  // return true if the stream has error
+  bool has_error() const { return _output.has_error(); }
+
 private:
   ByteStream _output;               // the Reassembler writes to this ByteStream.
   uint64_t _next_expected_index;    // the index of the next byte to be written.
-  std::map<uint64_t, char> _buffer; // use for store bytes that can't be written yet.
+  struct piceData {
+    uint64_t start_index;
+    uint64_t end_index;
+    std::string data;
+  };
+  std::deque<piceData> _buffer; // use for store bytes that can't be written yet.
   uint64_t _end_index;              // use for determine the end.
 };
