@@ -59,7 +59,7 @@ void TCPSegment::parse( Parser& parser, uint32_t datagram_layer_pseudo_checksum 
 class Wrap32Serializable : public Wrap32
 {
 public:
-  uint32_t raw_value() const { return raw_value_; }
+  uint32_t raw_value() const { return _raw_value; }
 };
 
 void TCPSegment::serialize( Serializer& serializer ) const

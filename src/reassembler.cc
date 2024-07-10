@@ -36,7 +36,9 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     piceData curr_data = { start_index, end_index, move( data ) };
     // if find a subData.end_index < curr_data.start, means no need to merge and continue.
     // so use binary search to find the first subData that its end_index >= curr_data.start_index.
-    auto it = lower_bound( _buffer.begin(), _buffer.end(), curr_data, []( const piceData& a, const piceData& b ) { return a.end_index < b.start_index; } );
+    auto it = lower_bound( _buffer.begin(), _buffer.end(), curr_data, []( const piceData& a, const piceData& b ) {
+      return a.end_index < b.start_index;
+    } );
     // loop all inside buffer_data to compress the buffer by merge
     while ( it != _buffer.end() ) {
       // if find a subData that is overlaped by curr_data, just remove it and continue the loop
