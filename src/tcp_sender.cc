@@ -46,8 +46,9 @@ void TCPSender::push( const TransmitFunction& transmit )
     }
 
     // if the msg len == 0, means no more to send, just break the loop
-    if ( msg.sequence_length() == 0 )
+    if ( msg.sequence_length() == 0 ) {
       break;
+    }
 
     // update abs_seq
     _abs_seq += msg.sequence_length();
@@ -84,8 +85,9 @@ void TCPSender::receive( const TCPReceiverMessage& msg )
   _window_size = _receiver_window_size == 0 ? 1 : _receiver_window_size;
 
   // check RST
-  if ( msg.RST )
+  if ( msg.RST ) {
     set_error();
+  }
 
   // When the receiver gives the sender an ackno that acknowledges the successful receipt
   // of new data (the ackno reflects an absolute sequence number bigger than any previous
