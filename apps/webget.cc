@@ -4,6 +4,7 @@
 #include <iostream>
 #include <span>
 #include <string>
+#include "tcp_minnow_socket.hh"
 
 using namespace std;
 
@@ -12,7 +13,9 @@ void get_URL( const string& host, const string& path )
   // cerr << "Function called: get_URL(" << host << ", " << path << ")\n";
   // cerr << "Warning: get_URL() has not been implemented yet.\n";
 
-  TCPSocket tcp;                   // default construct for TCPSocket
+  // TCPSocket tcp;                   // default construct for TCPSocket
+  CS144TCPSocket tcp; // default constructor for TCPSocket
+
   Address address( host, "http" ); // Construct by resolving a hostname and servicename.
   // Connect a socket to a specified peer address
   tcp.connect( address );
