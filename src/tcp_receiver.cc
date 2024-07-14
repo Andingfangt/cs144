@@ -18,8 +18,8 @@ void TCPReceiver::receive( TCPSenderMessage message )
     SYN = true;
   }
 
-  // if this message contains no SIN or FIN and data, means error happend
-  if ( !message.SYN && !message.FIN && message.payload.empty() ) {
+  // if this message contains RST, set error.
+  if (message.RST) {
     set_error();
   }
 
