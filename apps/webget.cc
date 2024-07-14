@@ -4,6 +4,7 @@
 #include <iostream>
 #include <span>
 #include <string>
+#include <sys/socket.h>
 #include "tcp_minnow_socket.hh"
 
 using namespace std;
@@ -35,7 +36,8 @@ void get_URL( const string& host, const string& path )
     buffer += part;
   }
   cout << buffer;
-  tcp.close();
+  // tcp.close(); // this close for TCPSocket
+  tcp.wait_until_closed(); // this close for CS144TCPSocket
 }
 
 int main( int argc, char* argv[] )
