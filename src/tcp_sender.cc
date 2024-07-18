@@ -27,6 +27,7 @@ void TCPSender::push( const TransmitFunction& transmit )
     if ( !_has_send_SYN ) {
       msg.SYN = true;
       _has_send_SYN = true;
+      _outstanding_sequence_numbers++;
     }
     // set the sequence number with current _checkpoint
     msg.seqno = Wrap32::wrap( _abs_seq, isn_ );
@@ -36,7 +37,7 @@ void TCPSender::push( const TransmitFunction& transmit )
     size_t payload_len = min( TCPConfig::MAX_PAYLOAD_SIZE,
                               min( _window_size - _outstanding_sequence_numbers, reader().bytes_buffered() ) );
     read( input_.reader(), payload_len, msg.payload );
-    _outstanding_sequence_numbers += msg.sequence_length();
+    _outstanding_sequence_numbers += payload_len;
 
     // if have read all the bytes in reader, check if have send FIN and it is availible to send it
     if ( reader().is_finished() && !_has_send_FIN && _outstanding_sequence_numbers < _window_size ) {
