@@ -1,11 +1,11 @@
 #include "socket.hh"
 
+#include "tcp_minnow_socket.hh"
 #include <cstdlib>
 #include <iostream>
 #include <span>
 #include <string>
 #include <sys/socket.h>
-#include "tcp_minnow_socket.hh"
 
 using namespace std;
 

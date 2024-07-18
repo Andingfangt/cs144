@@ -19,7 +19,7 @@ void TCPReceiver::receive( TCPSenderMessage message )
   }
 
   // if this message contains RST, set error.
-  if (message.RST) {
+  if ( message.RST ) {
     set_error();
   }
 

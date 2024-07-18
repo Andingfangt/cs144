@@ -1,9 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <queue>
+#include <unordered_map>
+#include <utility>
 
 #include "address.hh"
 #include "ethernet_frame.hh"
+#include "ethernet_header.hh"
 #include "ipv4_datagram.hh"
 
 // A "network interface" that connects IP (the internet layer, or network layer)
@@ -56,7 +61,8 @@ public:
   // If type is ARP reply, learn a mapping from the "sender" fields.
   void recv_frame( const EthernetFrame& frame );
 
-  // Called periodically when time elapses
+  // Called periodically when time elapses, Used to update mapping tables and ARP request restrictions (ARP requests
+  // for the same IP cannot be sent within 5 seconds).
   void tick( size_t ms_since_last_tick );
 
   // Accessors
@@ -81,4 +87,16 @@ private:
 
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
+
+  // IPv4 -> (Ethernet destination address, liveing time) Mapping table
+  std::unordered_map<uint32_t, std::pair<EthernetAddress, size_t>> IPMappings_;
+
+  // store ARP request times from IP address -> time;
+  std::unordered_map<uint32_t, size_t> ARPRequest_;
+
+  // Used to store datagrams waiting for ARP response
+  std::unordered_multimap<uint32_t, InternetDatagram> datagrams_queue_;
+
+  size_t IPmappingTimeout_;  // liveing time for IP address mapping
+  size_t ARPRequestTimeout_; // living time for ARP requset
 };
