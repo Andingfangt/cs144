@@ -56,9 +56,12 @@ void NetworkInterface::send_datagram( const InternetDatagram& dgram, const Addre
   }
   // If the destination Ethernet address is unknown
   else {
+    // queue the IP datagram so it can be sent after the ARP reply is received.
+    // this should be add before send the ARP request frame.
+    datagrams_queue_.insert( { raw_32_ip_adress, dgram } );
+
     // check if have send ARP request for this IP address and whether it is dead.
-    if ( ARPRequest_.find( raw_32_ip_adress ) == ARPRequest_.end()
-         || ARPRequest_[raw_32_ip_adress] > ARPRequestTimeout_ ) {
+    if ( !ARPRequest_.contains( raw_32_ip_adress ) || ARPRequest_[raw_32_ip_adress] > ARPRequestTimeout_ ) {
       // broadcast an ARP request for the next hop’s Ethernet address
       ARPMessage ARPrequst {};
       ARPrequst.opcode = ARPMessage::OPCODE_REQUEST;
@@ -79,8 +82,6 @@ void NetworkInterface::send_datagram( const InternetDatagram& dgram, const Addre
       // Record the time when the ARP request was sent.
       ARPRequest_[raw_32_ip_adress] = 0;
     }
-    // queue the IP datagram so it can be sent after the ARP reply is received.
-    datagrams_queue_.insert( { raw_32_ip_adress, dgram } );
   }
 }
 
@@ -98,7 +99,7 @@ void NetworkInterface::recv_frame( const EthernetFrame& frame )
     InternetDatagram dgram {};
     // if successful push the resulting datagram on to the datagrams received queue.
     if ( parse( dgram, frame.payload ) ) {
-      datagrams_received_.push( dgram );
+      datagrams_received_.push( std::move( dgram ) );
     }
   }
   // If the inbound frame is ARP
