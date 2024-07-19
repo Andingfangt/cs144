@@ -1,8 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <map>
 #include <memory>
 #include <optional>
+#include <utility>
 
+#include "address.hh"
 #include "exception.hh"
 #include "network_interface.hh"
 
@@ -35,4 +41,8 @@ public:
 private:
   // The router's collection of network interfaces
   std::vector<std::shared_ptr<NetworkInterface>> _interfaces {};
+
+  // The routing table, (prefix_length, route_prefix), ordered by prefix length DESC.
+  std::map<std::pair<uint8_t, uint32_t>, std::pair<std::optional<Address>, size_t>, std::greater<>>
+    _routing_table {};
 };
